@@ -12,7 +12,9 @@ import './styles/margin.css';
 import tremcladRust from './chipColors/tremcladRust/colors';
 
 function App() {
-  const [count, setCount] = useState(0);
+  const [red, setRed] = useState(61);
+  const [green, setGreen] = useState(77);
+  const [blue, setBlue] = useState(139);
 
   const chipSize = {
     height: '50px',
@@ -31,8 +33,30 @@ function App() {
 
   return (
     <>
-      <div className='u-flex u-flex-wrap'>
-        { paintChips }
+      <div className="u-ml4">
+        Red: <input type="number" min="0" max="255" value={ red } onChange={ (e) => setRed(e.target.value) } />
+        Green: <input type="number" min="0" max="255" value={ green } onChange={ (e) => setGreen(e.target.value) } />
+        Blue: <input type="number" min="0" max="255" value={ blue } onChange={ (e) => setBlue(e.target.value) } />
+      </div>
+      <div className="u-ml4 u-mb12">
+        Target Color
+        <PaintChip
+          name="Target Color"
+          color={{
+            red,
+            green,
+            blue
+          }}
+          size={ chipSize }
+          />
+      </div>
+      <div>
+        <div className="u-ml4">
+          Available Colors
+        </div>
+        <div className='u-flex u-flex-wrap'>
+          { paintChips }
+        </div>
       </div>
     </>
   );

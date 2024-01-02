@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useMemo, useState } from 'react';
 import reactLogo from './assets/react.svg';
 import viteLogo from '/vite.svg';
 import PaintChip from './PaintChip';
@@ -11,14 +11,26 @@ import './styles/margin.css';
 // Colors
 import tremcladRust from './chipColors/tremcladRust/colors';
 
+// Helpers
+import findClosest from './helpers/findClosest';
+import rgbToCmyk from './helpers/rgbToCmyk';
+
 function App() {
   const [red, setRed] = useState(61);
   const [green, setGreen] = useState(77);
   const [blue, setBlue] = useState(139);
 
+  const [closest, setClosest] = useState(null);
+
+  const targetCmyk = useMemo(() => rgbToCmyk({red, green, blue}), [red, green, blue]);
+
   const chipSize = {
     height: '50px',
     width: '50px',
+  };
+
+  const mixColor = () => {
+    setClosest(findClosest(rgbToCmyk({ red, green, blue}), rgbToCmyk({ red: 255, green: 255, blue: 255 }), tremcladRust));
   };
 
   const paintChips = tremcladRust.map(chip =>
@@ -37,6 +49,7 @@ function App() {
         Red: <input type="number" min="0" max="255" value={ red } onChange={ (e) => setRed(e.target.value) } />
         Green: <input type="number" min="0" max="255" value={ green } onChange={ (e) => setGreen(e.target.value) } />
         Blue: <input type="number" min="0" max="255" value={ blue } onChange={ (e) => setBlue(e.target.value) } />
+        <button onClick={() => {mixColor()}}>Mix</button>
       </div>
       <div className="u-ml4 u-mb12">
         Target Color
@@ -49,7 +62,14 @@ function App() {
           }}
           size={ chipSize }
           />
+          <div>CMYK: {targetCmyk.cyan.toFixed(2)} {targetCmyk.magenta.toFixed(2)} {targetCmyk.yellow.toFixed(2)} {targetCmyk.black.toFixed(2)}</div>
       </div>
+      { closest &&
+        <div className="u-ml4 u-mb12">
+          Closest Color
+          <PaintChip name={ closest.name } color={ closest.rgb } size={ chipSize } />
+        </div>
+      }
       <div>
         <div className="u-ml4">
           Available Colors

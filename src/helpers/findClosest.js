@@ -1,3 +1,5 @@
+import cmykDistance from './cmykDistance';
+
 export default function(targetColor, currentColor, availableColours) {
   const delta = {
     cyan: targetColor.cyan - currentColor.cyan,
@@ -6,26 +8,41 @@ export default function(targetColor, currentColor, availableColours) {
     black: targetColor.black - currentColor.black,
   }
 
-  return availableColours.reduce(
+  const closest = availableColours.reduce(
     (oldValue, newValue) => {
       // No color picked yet
       if (oldValue === null) {
         return newValue;
       }
+
+      const oldDelta = {
+        cyan: oldValue.cmyk.cyan - currentColor.cyan,
+        magenta: oldValue.cmyk.magenta - currentColor.magenta,
+        yellow: oldValue.cmyk.yellow - currentColor.yellow,
+        black: oldValue.cmyk.black - currentColor.black,
+      }
+
+      const newDelta = {
+        cyan: newValue.cmyk.cyan - currentColor.cyan,
+        magenta: newValue.cmyk.magenta - currentColor.magenta,
+        yellow: newValue.cmyk.yellow - currentColor.yellow,
+        black: newValue.cmyk.black - currentColor.black,
+      }
+
       // The next value is closer
-      if (heuristic(delta, newValue.cmyk) < heuristic(delta, oldValue.cmyk)) {
+      if (heuristic(delta, newDelta) < heuristic(delta, oldDelta)) {
         return newValue;
       }
+
       // The previous value is closer
       return oldValue;
     },
     null
   );
+
+  return closest;
 }
 
 function heuristic(delta, color) {
-  return Math.abs(delta.cyan - color.cyan) +
-    Math.abs(delta.magenta - color.magenta) +
-    Math.abs(delta.yellow - color.yellow) +
-    Math.abs(delta.black - color.black);
+  return cmykDistance(delta, color);
 }

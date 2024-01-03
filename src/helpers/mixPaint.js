@@ -1,7 +1,9 @@
 import cmykDistance from './cmykDistance';
 
-export default function(colors, targetColor) {
-  let finalColor = {
+const distanceTolerance = 0.001;
+
+function mixPaint(colors, targetColor, previousDistance = null) {
+  let mixedColor = {
     cyan: 0,
     magenta: 0,
     yellow: 0,
@@ -14,16 +16,41 @@ export default function(colors, targetColor) {
     const cmyk = color.paint.cmyk;
     totalTimes += color.times;
 
-    finalColor.cyan += cmyk.cyan * color.times;
-    finalColor.magenta += cmyk.magenta * color.times;
-    finalColor.yellow += cmyk.yellow * color.times;
-    finalColor.black += cmyk.black * color.times;
+    mixedColor.cyan += cmyk.cyan * color.times;
+    mixedColor.magenta += cmyk.magenta * color.times;
+    mixedColor.yellow += cmyk.yellow * color.times;
+    mixedColor.black += cmyk.black * color.times;
   }
 
-  finalColor.cyan /= totalTimes;
-  finalColor.magenta /= totalTimes;
-  finalColor.yellow /= totalTimes;
-  finalColor.black /= totalTimes;
+  mixedColor.cyan /= totalTimes;
+  mixedColor.magenta /= totalTimes;
+  mixedColor.yellow /= totalTimes;
+  mixedColor.black /= totalTimes;
+  
+  const distance = cmykDistance(targetColor.cmyk, mixedColor);
 
-  return finalColor;
+  if (previousDistance === null || previousDistance - distance > distanceTolerance) {
+    // Moving in the right direction, keep adding parts
+    let newColors = structuredClone(colors);
+    for (let i = 0; i < newColors.length; i++) {
+      if (newColors[i].times > 100) {
+        continue;
+      }
+
+      newColors[i].times++;
+
+      let derivedMix = mixPaint(newColors, targetColor, distance);
+
+      if (distance - cmykDistance(targetColor.cmyk, derivedMix.cmykResult) > distanceTolerance) {
+        return derivedMix;
+      }
+    }
+  }
+
+  return {
+    formula: colors,
+    cmykResult: mixedColor,
+  };
 }
+
+export default mixPaint;

@@ -61,10 +61,13 @@ function App() {
 //
 //     const secondMixedPaint = mixPaint([{cmyk: firstMixedPaint}, third]);
 
+    let finalMixedPaint = firstMixedPaint;
+    console.log(finalMixedPaint.formula);
+
     setMixed({
       name: 'Mixed Color',
-      rgb: cmykToRgb(firstMixedPaint),
-      cmyk: firstMixedPaint,
+      rgb: cmykToRgb(finalMixedPaint.cmykResult),
+      cmyk: finalMixedPaint.cmykResult,
     });
   };
 
